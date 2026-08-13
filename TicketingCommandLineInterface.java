@@ -11,15 +11,11 @@ import entities.Event;
 import entities.Seat;
 import entities.Venue;
 import enums.EventStatus;
+import repositories.TicketingRepository;
 
 public class TicketingCommandLineInterface {
 
     static Scanner scan = new Scanner(System.in);
-
-    static ArrayList<Venue> venues = new ArrayList<>();
-    static ArrayList<Event> events = new ArrayList<>();
-    static ArrayList<Seat> seats = new ArrayList<>();
-
     public static void main(String[] args) {
 
         boolean restartTicketingSystem = true;
@@ -103,7 +99,7 @@ public class TicketingCommandLineInterface {
         String venueAddress = scan.nextLine().trim();
 
         Venue venue = new Venue(UUID.randomUUID(), venueName, venueAddress, ZoneId.of("Africa/Addis_Ababa"));
-        venues.add(venue);
+        TicketingRepository.venues.add(venue);
 
         System.out.print("\nWould you you like to add seats to " + venueName + "? (Y/N): ");
         char addSeatsChoice = scan.next().charAt(0);
@@ -128,7 +124,7 @@ public class TicketingCommandLineInterface {
 
         Venue venueToAddEvent = null;
 
-        for(Venue venue : venues) {
+        for(Venue venue : TicketingRepository.venues) {
             if(venue.id().toString().equals(venueId)) {
                 venueToAddEvent = venue;
                 break;
@@ -142,7 +138,7 @@ public class TicketingCommandLineInterface {
 
         ArrayList<Seat> seatsInTheVenue = new ArrayList<>();
 
-        for(Seat seat : seats) {
+        for(Seat seat : TicketingRepository.seats) {
             if(seat.venueId().toString().equals(venueId)) {
                 seatsInTheVenue.add(seat);
             }
@@ -185,7 +181,7 @@ public class TicketingCommandLineInterface {
 
         ZoneId venueTimezone = null;
 
-        for(Venue venue : venues) {
+        for(Venue venue : TicketingRepository.venues) {
             if(venue.id().toString().equals(venueId)) {
                 venueTimezone = venue.timezone();
                 break;
@@ -201,7 +197,7 @@ public class TicketingCommandLineInterface {
         LocalDateTime endLocalDateTime = startLocalDateTime.plusMinutes(duration);
         ZonedDateTime endZonedDateTime = endLocalDateTime.atZone(venueTimezone);
 
-        events.add(new Event(UUID.randomUUID(), UUID.fromString(venueId), eventTitle, startZonedDateTime, endZonedDateTime, EventStatus.UPCOMING, null));
+        TicketingRepository.events.add(new Event(UUID.randomUUID(), UUID.fromString(venueId), eventTitle, startZonedDateTime, endZonedDateTime, EventStatus.UPCOMING, null));
 
         System.out.println("\t Event added successfully.");
     }
@@ -246,7 +242,7 @@ public class TicketingCommandLineInterface {
 
             for (int i = 1; i <= numberOfRows; i++) {
                 for (int j = 1; j <= numberOfSeats; j++) {
-                    seats.add(new Seat(UUID.randomUUID(), venueId, section, String.valueOf(i), j, null));
+                    TicketingRepository.seats.add(new Seat(UUID.randomUUID(), venueId, section, String.valueOf(i), j, null));
                     sectionSeatsAdded++;
                 }
             }
@@ -275,7 +271,7 @@ public class TicketingCommandLineInterface {
 
         Venue venueToAddSeats = null;
 
-        for(Venue venue : venues) {
+        for(Venue venue : TicketingRepository.venues) {
             if(venue.id().toString().equals(venueId)) {
                 venueToAddSeats = venue;
                 break;
@@ -287,7 +283,7 @@ public class TicketingCommandLineInterface {
             return;
         }
 
-        for(Seat seat : seats) {
+        for(Seat seat : TicketingRepository.seats) {
             if(seat.venueId().toString().equals(venueId)) {
                 System.out.println("\nVenue with ID " + venueId + " already have seats.");
                 return;
@@ -333,7 +329,7 @@ public class TicketingCommandLineInterface {
 
             for (int i = 1; i <= numberOfRows; i++) {
                 for (int j = 1; j <= numberOfSeats; j++) {
-                    seats.add(new Seat(UUID.randomUUID(), venueToAddSeats.id(), section, String.valueOf(i), j, null));
+                    TicketingRepository.seats.add(new Seat(UUID.randomUUID(), venueToAddSeats.id(), section, String.valueOf(i), j, null));
                     sectionSeatsAdded++;
                 }
             }
@@ -357,7 +353,7 @@ public class TicketingCommandLineInterface {
 
     static void listVenues() {
         System.out.println("\nList of Venues:");
-        for (Venue venue : venues) {
+        for (Venue venue : TicketingRepository.venues) {
             System.out.println("\n-----------------------------");
             System.out.println("\nVenue ID: " + venue.id());
             System.out.println("Venue Name: " + venue.name());
@@ -369,7 +365,7 @@ public class TicketingCommandLineInterface {
 
     static void listEvents() {
         System.out.println("\nList of Events:");
-        for (Event event : events) {
+        for (Event event : TicketingRepository.events) {
             System.out.println("\n-----------------------------");
             System.out.println("\nEvent ID: " + event.id());
             System.out.println("Venue ID: " + event.venueId());
@@ -388,7 +384,7 @@ public class TicketingCommandLineInterface {
 
         Venue venueToListSeats = null;
 
-        for (Venue venue : venues) {
+        for (Venue venue : TicketingRepository.venues) {
             if (venue.id().toString().equals(venueId)) {
                 venueToListSeats = venue;
                 break;
@@ -402,7 +398,7 @@ public class TicketingCommandLineInterface {
 
         ArrayList<Seat> seatsInTheVenue = new ArrayList<>();
 
-        for(Seat seat : seats) {
+        for(Seat seat : TicketingRepository.seats) {
             if(seat.venueId().toString().equals(venueId)) {
                 seatsInTheVenue.add(seat);
             }
@@ -415,7 +411,7 @@ public class TicketingCommandLineInterface {
 
         System.out.println("\nList of Seats:\n");
 
-        for(Seat seat : seats) {
+        for(Seat seat : TicketingRepository.seats) {
                 System.out.println(seat.id() + "\t\t" + seat.section() + "\t\t" + seat.row() + "   " + seat.number());
         }
     }
