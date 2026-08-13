@@ -18,7 +18,7 @@ public class SeatService {
             System.out.print("\nEnter section name (e.g., VIP, Regular, Balcony): ");
             String section = scan.next().toUpperCase();
 
-            if (section.isBlank() || section == null) {
+            if ( section == null || section.isBlank()) {
                 System.out.println("Section name cannot be empty.");
                 continue;
             }
@@ -31,6 +31,11 @@ public class SeatService {
             }
 
             int numberOfRows = scan.nextInt();
+
+            if (numberOfRows <= 0) {
+                System.out.println("Number of seats must be a positive integer.");
+                continue;
+            }
 
             System.out.print("\nEnter number of seats per row for section '" + section + "': ");
             

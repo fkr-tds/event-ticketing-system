@@ -92,8 +92,19 @@ public class EventService {
         ZonedDateTime startZonedDateTime = startLocalDateTime.atZone(venueTimezone);
 
         System.out.print("\nEnter the event duration in minutes: ");
+
+        if (!scan.hasNextInt()) {
+            System.out.println("\nPlease enter a valid integer.");
+            return;
+        }
+
         int duration = scan.nextInt();
         scan.nextLine();
+
+        if (duration <= 0) {
+            System.out.println("Event duration must be a positive number of minutes.");
+            return;
+        }
 
         LocalDateTime endLocalDateTime = startLocalDateTime.plusMinutes(duration);
         ZonedDateTime endZonedDateTime = endLocalDateTime.atZone(venueTimezone);
