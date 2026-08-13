@@ -33,7 +33,7 @@ public class SeatService {
             int numberOfRows = scan.nextInt();
 
             if (numberOfRows <= 0) {
-                System.out.println("Number of seats must be a positive integer.");
+                System.out.println("Number of rows must be a positive integer.");
                 continue;
             }
 
