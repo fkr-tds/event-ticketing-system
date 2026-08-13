@@ -9,9 +9,8 @@ import entities.Venue;
 import repositories.TicketingRepository;
 
 public class SeatService {
-    static Scanner scan = new Scanner(System.in);
 
-    static void addSeats(UUID venueId, String venueName) {
+    static void addSeats(UUID venueId, String venueName, Scanner scan) {
         int totalSeatsAdded = 0;
         boolean addingSections = false;
 
@@ -73,7 +72,7 @@ public class SeatService {
         System.out.println("\nAdded a total of " + totalSeatsAdded + " seat(s) to venue " + venueName + ".");
     }
 
-    public static void addSeats() {
+    public static void addSeats(Scanner scan) {
         VenueService.listVenues();
         System.out.print("\nEnter a venue Id for the seats: ");
         String venueId = scan.next();
@@ -160,7 +159,7 @@ public class SeatService {
         System.out.println("\nAdded a total of " + totalSeatsAdded + " seat(s) to venue " + venueToAddSeats.name() + ".");
     }
 
-    public static void listSeats() {
+    public static void listSeats(Scanner scan) {
         VenueService.listVenues();
         System.out.print("\nEnter the venue Id: ");
         String venueId = scan.next();

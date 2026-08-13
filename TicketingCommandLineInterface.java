@@ -32,22 +32,22 @@ public class TicketingCommandLineInterface {
 
                 switch (operatorChoice) {
                     case 1:
-                        VenueService.addVenue();
+                        VenueService.addVenue(scan);
                         break;
                     case 2:
                         VenueService.listVenues();
                         break;
                     case 3:
-                        EventService.addEvent();
+                        EventService.addEvent(scan);
                         break;
                     case 4:
                         EventService.listEvents();
                         break;
                     case 5:
-                        SeatService.addSeats();
+                        SeatService.addSeats(scan);
                         break;
                     case 6:
-                        SeatService.listSeats();
+                        SeatService.listSeats(scan);
                         break;
                     default:
                         System.out.println("\nInvalid choice. Please select a valid option.");

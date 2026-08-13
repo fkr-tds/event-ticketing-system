@@ -16,9 +16,8 @@ import enums.EventStatus;
 import repositories.TicketingRepository;
 
 public class EventService {
-    static Scanner scan = new Scanner(System.in);
 
-    public static void addEvent() {
+    public static void addEvent(Scanner scan) {
         VenueService.listVenues();
         System.out.print("\nEnter a venue Id for the event: ");
         String venueId = scan.next();

@@ -8,10 +8,8 @@ import entities.Venue;
 import repositories.TicketingRepository;
 
 public class VenueService {
-
-    static Scanner scan = new Scanner(System.in);
     
-    public static void addVenue() {
+    public static void addVenue(Scanner scan) {
         System.out.print("\nEnter the venue name: ");
         String venueName = scan.nextLine().trim();
 
@@ -26,7 +24,7 @@ public class VenueService {
         scan.nextLine();
 
         if (addSeatsChoice == 'Y' || addSeatsChoice == 'y') {
-            SeatService.addSeats(venue.id(), venue.name());
+            SeatService.addSeats(venue.id(), venue.name(), scan);
         } else if (addSeatsChoice == 'N' || addSeatsChoice == 'n') {
             System.out.println("\nYou have chosen not to add seats to " + venueName + ".");
         } else {
