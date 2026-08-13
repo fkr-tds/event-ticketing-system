@@ -98,65 +98,7 @@ public class SeatService {
             }
         }
 
-        int totalSeatsAdded = 0;
-        boolean addingSections = false;
-
-        do {
-            System.out.print("\nEnter section name (e.g., VIP, Regular, Balcony): ");
-            String section = scan.next().toUpperCase();
-
-            if (section.isBlank() || section == null) {
-                System.out.println("Section name cannot be empty.");
-                continue;
-            }
-
-            System.out.print("\nEnter number of rows for section '" + section + "': ");
-
-            if (!scan.hasNextInt()) {
-                System.out.println("\nPlease enter a valid integer.");
-                continue;
-            }
-            
-            int numberOfRows = scan.nextInt();
-
-            System.out.print("\nEnter number of seats per row for section '" + section + "': ");
-
-            if (!scan.hasNextInt()) {
-                System.out.println("\nPlease enter a valid integer.");
-                continue;
-            }
-
-            int numberOfSeats = scan.nextInt();
-
-            if (numberOfSeats <= 0) {
-                System.out.println("Number of seats must be a positive integer.");
-                continue;
-            }
-
-            int sectionSeatsAdded = 0;
-
-            for (int i = 1; i <= numberOfRows; i++) {
-                for (int j = 1; j <= numberOfSeats; j++) {
-                    TicketingRepository.seats.add(new Seat(UUID.randomUUID(), venueToAddSeats.id(), section, String.valueOf(i), j, null));
-                    sectionSeatsAdded++;
-                }
-            }
-
-            totalSeatsAdded += sectionSeatsAdded;
-            System.out.println("\n--> Added " + sectionSeatsAdded + " seat(s) to section '" + section + "'.");
-
-            System.out.print("\nDo you want to add another section to this venue? (Y/N): ");
-            char addSectionChoice = scan.next().charAt(0);
-            if (addSectionChoice == 'y' || addSectionChoice == 'Y') {
-                addingSections = true;
-            } else if (addSectionChoice == 'n' || addSectionChoice == 'N') {
-                addingSections = false;
-            } else {
-                System.out.println("\nInvalid input. Please enter 'Y' for Yes or 'N' for No.");
-            }
-            } while (addingSections);
-
-        System.out.println("\nAdded a total of " + totalSeatsAdded + " seat(s) to venue " + venueToAddSeats.name() + ".");
+        addSeats(venueToAddSeats.id(), venueToAddSeats.name(), scan);
     }
 
     public static void listSeats(Scanner scan) {
