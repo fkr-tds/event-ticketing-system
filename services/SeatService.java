@@ -10,7 +10,15 @@ import repositories.TicketingRepository;
 
 public class SeatService {
 
-    static void addSeats(UUID venueId, String venueName, Scanner scan) {
+    private final Scanner scan;
+    private final TicketingRepository ticketingRepository;
+
+    public SeatService (Scanner scan, TicketingRepository ticketingRepository) {
+        this.scan = scan;
+        this.ticketingRepository = ticketingRepository;
+    }
+
+    public void addSeats(UUID venueId, String venueName) {
         int totalSeatsAdded = 0;
         boolean addingSections = false;
 
@@ -55,7 +63,7 @@ public class SeatService {
 
             for (int i = 1; i <= numberOfRows; i++) {
                 for (int j = 1; j <= numberOfSeats; j++) {
-                    TicketingRepository.seats.add(new Seat(UUID.randomUUID(), venueId, section, String.valueOf(i), j, null));
+                    ticketingRepository.addSeat(new Seat(UUID.randomUUID(), venueId, section, String.valueOf(i), j, null));
                     sectionSeatsAdded++;
                 }
             }
@@ -77,14 +85,13 @@ public class SeatService {
         System.out.println("\nAdded a total of " + totalSeatsAdded + " seat(s) to venue " + venueName + ".");
     }
 
-    public static void addSeats(Scanner scan) {
-        VenueService.listVenues();
+    public void addSeats() {
         System.out.print("\nEnter a venue Id for the seats: ");
         String venueId = scan.next();
 
         Venue venueToAddSeats = null;
 
-        for(Venue venue : TicketingRepository.venues) {
+        for(Venue venue : ticketingRepository.listVenues()) {
             if(venue.id().toString().equals(venueId)) {
                 venueToAddSeats = venue;
                 break;
@@ -96,24 +103,23 @@ public class SeatService {
             return;
         }
 
-        for(Seat seat : TicketingRepository.seats) {
+        for(Seat seat : ticketingRepository.listSeats()) {
             if(seat.venueId().toString().equals(venueId)) {
                 System.out.println("\nVenue with ID " + venueId + " already have seats.");
                 return;
             }
         }
 
-        addSeats(venueToAddSeats.id(), venueToAddSeats.name(), scan);
+        addSeats(venueToAddSeats.id(), venueToAddSeats.name());
     }
 
-    public static void listSeats(Scanner scan) {
-        VenueService.listVenues();
+    public void listSeats() {
         System.out.print("\nEnter the venue Id: ");
         String venueId = scan.next();
 
         Venue venueToListSeats = null;
 
-        for (Venue venue : TicketingRepository.venues) {
+        for (Venue venue : ticketingRepository.listVenues()) {
             if (venue.id().toString().equals(venueId)) {
                 venueToListSeats = venue;
                 break;
@@ -127,7 +133,7 @@ public class SeatService {
 
         ArrayList<Seat> seatsInTheVenue = new ArrayList<>();
 
-        for(Seat seat : TicketingRepository.seats) {
+        for(Seat seat : ticketingRepository.listSeats()) {
             if(seat.venueId().toString().equals(venueId)) {
                 seatsInTheVenue.add(seat);
             }
@@ -140,7 +146,7 @@ public class SeatService {
 
         System.out.println("\nList of Seats:\n");
 
-        for(Seat seat : TicketingRepository.seats) {
+        for(Seat seat : seatsInTheVenue) {
                 System.out.println(seat.id() + "\t\t" + seat.section() + "\t\t" + seat.row() + "   " + seat.number());
         }
     }

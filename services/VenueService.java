@@ -8,8 +8,18 @@ import entities.Venue;
 import repositories.TicketingRepository;
 
 public class VenueService {
+
+    private final Scanner scan;
+    private final SeatService seatService;
+    private final TicketingRepository ticketingRepository;
+
+    public VenueService (Scanner scan, SeatService seatService, TicketingRepository ticketingRepository) {
+        this.scan = scan;
+        this.seatService = seatService;
+        this.ticketingRepository = ticketingRepository;
+    }
     
-    public static void addVenue(Scanner scan) {
+    public void addVenue() {
         System.out.print("\nEnter the venue name: ");
         String venueName = scan.nextLine().trim();
 
@@ -17,14 +27,14 @@ public class VenueService {
         String venueAddress = scan.nextLine().trim();
 
         Venue venue = new Venue(UUID.randomUUID(), venueName, venueAddress, ZoneId.of("Africa/Addis_Ababa"));
-        TicketingRepository.venues.add(venue);
+        ticketingRepository.addVenue(venue);
 
         System.out.print("\nWould you you like to add seats to " + venueName + "? (Y/N): ");
         char addSeatsChoice = scan.next().charAt(0);
         scan.nextLine();
 
         if (addSeatsChoice == 'Y' || addSeatsChoice == 'y') {
-            SeatService.addSeats(venue.id(), venue.name(), scan);
+            seatService.addSeats(venue.id(), venue.name());
         } else if (addSeatsChoice == 'N' || addSeatsChoice == 'n') {
             System.out.println("\nYou have chosen not to add seats to " + venueName + ".");
         } else {
@@ -34,9 +44,9 @@ public class VenueService {
         System.out.println("\nVenue added successfully.");
     }
 
-    public static void listVenues() {
+    public void listVenues() {
         System.out.println("\nList of Venues:");
-        for (Venue venue : TicketingRepository.venues) {
+        for (Venue venue : ticketingRepository.listVenues()) {
             System.out.println("\n-----------------------------");
             System.out.println("\nVenue ID: " + venue.id());
             System.out.println("Venue Name: " + venue.name());
