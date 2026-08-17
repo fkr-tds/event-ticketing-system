@@ -1,6 +1,7 @@
 package services;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.UUID;
 
@@ -87,12 +88,19 @@ public class SeatService {
 
     public void addSeats() {
         System.out.print("\nEnter a venue Id for the seats: ");
-        String venueId = scan.next();
+        UUID venueId;
+        try {
+            venueId = UUID.fromString(scan.next());
+            scan.nextLine();
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid UUID format. Please enter a valid venue ID.");
+            return;
+        }
 
         Venue venueToAddSeats = null;
 
-        for(Venue venue : ticketingRepository.listVenues()) {
-            if(venue.id().toString().equals(venueId)) {
+        for(Venue venue : ticketingRepository.findAllVenues()) {
+            if(venueId.equals(venue.id())) {
                 venueToAddSeats = venue;
                 break;
             }
@@ -103,8 +111,8 @@ public class SeatService {
             return;
         }
 
-        for(Seat seat : ticketingRepository.listSeats()) {
-            if(seat.venueId().toString().equals(venueId)) {
+        for(Seat seat : ticketingRepository.findAllSeats()) {
+            if(venueId.equals(seat.venueId())) {
                 System.out.println("\nVenue with ID " + venueId + " already have seats.");
                 return;
             }
@@ -115,12 +123,19 @@ public class SeatService {
 
     public void listSeats() {
         System.out.print("\nEnter the venue Id: ");
-        String venueId = scan.next();
+        UUID venueId;
+        try {
+            venueId = UUID.fromString(scan.next());
+            scan.nextLine();
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid UUID format. Please enter a valid venue ID.");
+            return;
+        }
 
         Venue venueToListSeats = null;
 
-        for (Venue venue : ticketingRepository.listVenues()) {
-            if (venue.id().toString().equals(venueId)) {
+        for (Venue venue : ticketingRepository.findAllVenues()) {
+            if (venueId.equals(venue.id())) {
                 venueToListSeats = venue;
                 break;
             }
@@ -131,10 +146,10 @@ public class SeatService {
             return;
         }
 
-        ArrayList<Seat> seatsInTheVenue = new ArrayList<>();
+        List<Seat> seatsInTheVenue = new ArrayList<>();
 
-        for(Seat seat : ticketingRepository.listSeats()) {
-            if(seat.venueId().toString().equals(venueId)) {
+        for(Seat seat : ticketingRepository.findAllSeats()) {
+            if(venueId.equals(seat.venueId())) {
                 seatsInTheVenue.add(seat);
             }
         }

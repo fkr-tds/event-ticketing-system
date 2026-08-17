@@ -46,7 +46,7 @@ public class VenueService {
 
     public void listVenues() {
         System.out.println("\nList of Venues:");
-        for (Venue venue : ticketingRepository.listVenues()) {
+        for (Venue venue : ticketingRepository.findAllVenues()) {
             System.out.println("\n-----------------------------");
             System.out.println("\nVenue ID: " + venue.id());
             System.out.println("Venue Name: " + venue.name());

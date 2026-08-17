@@ -2,6 +2,7 @@ import java.util.Scanner;
 
 import repositories.TicketingRepository;
 import services.EventService;
+import services.ReservationService;
 import services.SeatService;
 import services.VenueService;
 
@@ -14,6 +15,7 @@ public class TicketingCommandLineInterface {
     SeatService seatService = new SeatService(scan, ticketingRepository);
     VenueService venueService = new VenueService(scan, seatService, ticketingRepository);
     EventService eventService = new EventService(scan, ticketingRepository);
+    ReservationService reservationService = new ReservationService(scan, ticketingRepository);
 
     boolean restartTicketingSystem = true;
 
@@ -63,8 +65,8 @@ public class TicketingCommandLineInterface {
             }
         } else if (userType == 'C' || userType == 'c') {
             System.out.println("\nYou are logged in as a Customer. What would you like to do?");
-            System.out.println("\n1. List Venues\t2. List Events");
-            System.out.print("\nPlease select an option (1 or 2): ");
+            System.out.println("\n1. List Venues\t2. List Events\t3. Make Reservation");
+            System.out.print("\nPlease select an option (1, 2 or 3): ");
 
             if (!scan.hasNextInt()) {
                 System.out.println("\nPlease enter a valid integer.");
@@ -72,6 +74,7 @@ public class TicketingCommandLineInterface {
             }
 
             int customerChoice = scan.nextInt();
+            scan.nextLine();
 
             switch (customerChoice) {
                 case 1:
@@ -79,6 +82,10 @@ public class TicketingCommandLineInterface {
                     break;
                 case 2:
                     eventService.listEvents();
+                    break;
+                case 3:
+                    eventService.listEvents();
+                    reservationService.makeReservation();
                     break;
                 default:
                     System.out.println("\nInvalid choice. Please select a valid option.");

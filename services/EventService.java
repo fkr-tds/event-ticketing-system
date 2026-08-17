@@ -27,13 +27,19 @@ public class EventService {
 
     public void addEvent() {
         System.out.print("\nEnter a venue Id for the event: ");
-        String venueId = scan.next();
-        scan.nextLine();
+        UUID venueId;
+        try {
+            venueId = UUID.fromString(scan.next());
+            scan.nextLine();
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid UUID format. Please enter a valid venue ID.");
+            return;
+        }
 
         Venue venueToAddEvent = null;
 
-        for(Venue venue : ticketingRepository.listVenues()) {
-            if(venue.id().toString().equals(venueId)) {
+        for(Venue venue : ticketingRepository.findAllVenues()) {
+            if(venueId.equals(venue.id())) {
                 venueToAddEvent = venue;
                 break;
             }
@@ -46,8 +52,8 @@ public class EventService {
 
         ArrayList<Seat> seatsInTheVenue = new ArrayList<>();
 
-        for(Seat seat : ticketingRepository.listSeats()) {
-            if(seat.venueId().toString().equals(venueId)) {
+        for(Seat seat : ticketingRepository.findAllSeats()) {
+            if(venueId.equals(seat.venueId())) {
                 seatsInTheVenue.add(seat);
             }
         }
@@ -89,8 +95,8 @@ public class EventService {
 
         ZoneId venueTimezone = null;
 
-        for(Venue venue : ticketingRepository.listVenues()) {
-            if(venue.id().toString().equals(venueId)) {
+        for(Venue venue : ticketingRepository.findAllVenues()) {
+            if(venueId.equals(venue.id())) {
                 venueTimezone = venue.timezone();
                 break;
             }
@@ -116,14 +122,14 @@ public class EventService {
         LocalDateTime endLocalDateTime = startLocalDateTime.plusMinutes(duration);
         ZonedDateTime endZonedDateTime = endLocalDateTime.atZone(venueTimezone);
 
-        ticketingRepository.addEvent(new Event(UUID.randomUUID(), UUID.fromString(venueId), eventTitle, startZonedDateTime, endZonedDateTime, EventStatus.UPCOMING, null));
+        ticketingRepository.addEvent(new Event(UUID.randomUUID(), venueId, eventTitle, startZonedDateTime, endZonedDateTime, EventStatus.UPCOMING, null));
 
         System.out.println("\nEvent added successfully.");
     }
 
     public void listEvents() {
         System.out.println("\nList of Events:");
-        for (Event event : ticketingRepository.listEvents()) {
+        for (Event event : ticketingRepository.findAllEvents()) {
             System.out.println("\n-----------------------------");
             System.out.println("\nEvent ID: " + event.id());
             System.out.println("Venue ID: " + event.venueId());
