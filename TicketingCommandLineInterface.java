@@ -32,6 +32,7 @@ public class TicketingCommandLineInterface {
 
             if (!scan.hasNextInt()) {
                 System.out.println("\nPlease enter a valid integer.");
+                scan.nextLine();
                 continue;
             }
             
@@ -70,6 +71,7 @@ public class TicketingCommandLineInterface {
 
             if (!scan.hasNextInt()) {
                 System.out.println("\nPlease enter a valid integer.");
+                scan.nextLine();
                 continue;
             }
 

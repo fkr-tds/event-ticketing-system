@@ -5,7 +5,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
+import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.Scanner;
 import java.util.UUID;
 
@@ -36,27 +37,14 @@ public class EventService {
             return;
         }
 
-        Venue venueToAddEvent = null;
-
-        for(Venue venue : ticketingRepository.findAllVenues()) {
-            if(venueId.equals(venue.id())) {
-                venueToAddEvent = venue;
-                break;
-            }
-        }
+        Venue venueToAddEvent = ticketingRepository.findVenueById(venueId);
 
         if (venueToAddEvent == null) {
             System.out.println("\nVenue with ID " + venueId + " does not exist.");
             return;
         }
 
-        ArrayList<Seat> seatsInTheVenue = new ArrayList<>();
-
-        for(Seat seat : ticketingRepository.findAllSeats()) {
-            if(venueId.equals(seat.venueId())) {
-                seatsInTheVenue.add(seat);
-            }
-        }
+        List<Seat> seatsInTheVenue = ticketingRepository.findSeatsByVenueId(venueId);
 
         if (seatsInTheVenue.isEmpty()) {
             System.out.println("\nVenue with ID " + venueId + " does not have any seats.");
@@ -66,48 +54,51 @@ public class EventService {
         System.out.print("\nEnter the event title: ");
         String eventTitle = scan.nextLine().trim();
 
-        System.out.print("\nDate [yyyy-MM-dd] (eg. 2027-01-01): ");
-        String dateString = scan.nextLine();
-
-        if(!dateString.matches("\\d{4}-\\d{2}-\\d{2}")) {
-            System.out.println("\nInvalid date format. Please enter the date in the format yyyy-MM-dd.");
+        if (eventTitle.isBlank()) {
+            System.out.println("\nEvent title cannot be empty.");
             return;
         }
 
-        LocalDate date = LocalDate.parse(dateString);
+        System.out.print("\nDate [yyyy-MM-dd] (eg. 2027-01-01): ");
+        String dateString = scan.nextLine().trim();
 
-        if(date.isBefore(LocalDate.now())) {
-            System.out.println("\nInvalid date. Please enter a future date.");
+        LocalDate date;
+
+        try {
+            date = LocalDate.parse(dateString);
+        } catch (DateTimeParseException e) {
+            System.out.println("Invalid date. Please enter the date in the format yyyy-MM-dd.");
             return;
         }
 
         System.out.print("\nTime [HH:mm] (eg. 01:01): ");
-        String timeString = scan.nextLine();
+        String timeString = scan.nextLine().trim();
 
-        if(!timeString.matches("\\d{2}:\\d{2}")) {
-            System.out.println("\nInvalid time format. Please enter the time in the format HH:mm.");
+        LocalTime time;
+
+        try {
+            time = LocalTime.parse(timeString);
+        } catch (DateTimeParseException e) {
+            System.out.println("Invalid time. Please enter the time in the format HH:mm.");
             return;
         }
 
-        LocalTime time = LocalTime.parse(timeString);
-
         LocalDateTime startLocalDateTime = LocalDateTime.of(date, time);
 
-        ZoneId venueTimezone = null;
-
-        for(Venue venue : ticketingRepository.findAllVenues()) {
-            if(venueId.equals(venue.id())) {
-                venueTimezone = venue.timezone();
-                break;
-            }
-        }
+        ZoneId venueTimezone = venueToAddEvent.timezone();
 
         ZonedDateTime startZonedDateTime = startLocalDateTime.atZone(venueTimezone);
+
+        if (startZonedDateTime.isBefore(ZonedDateTime.now(venueTimezone))) {
+            System.out.println("\nPlease enter a future date or time.");
+            return;
+        }
 
         System.out.print("\nEnter the event duration in minutes: ");
 
         if (!scan.hasNextInt()) {
             System.out.println("\nPlease enter a valid integer.");
+            scan.nextLine();
             return;
         }
 
@@ -122,6 +113,17 @@ public class EventService {
         LocalDateTime endLocalDateTime = startLocalDateTime.plusMinutes(duration);
         ZonedDateTime endZonedDateTime = endLocalDateTime.atZone(venueTimezone);
 
+        for (Event existingEvent : ticketingRepository.findAllEvents()) {
+
+            if (!existingEvent.venueId().equals(venueId)) {
+                continue;
+            }
+
+            if (startZonedDateTime.isBefore(existingEvent.end()) && endZonedDateTime.isAfter(existingEvent.start())) {
+                System.out.println("\nThe venue is already occupied by event '" + existingEvent.title() + "' during the selected time.");
+                return;
+            }
+        }
         ticketingRepository.addEvent(new Event(UUID.randomUUID(), venueId, eventTitle, startZonedDateTime, endZonedDateTime, EventStatus.UPCOMING, null));
 
         System.out.println("\nEvent added successfully.");

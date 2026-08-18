@@ -39,14 +39,7 @@ public class ReservationService {
             return;
         }
 
-        Event eventToReserve = null;
-
-        for (Event event : ticketingRepository.findAllEvents()) {
-            if (eventId.equals(event.id())) {
-                eventToReserve = event;
-                break;
-            }
-        }
+        Event eventToReserve = ticketingRepository.findEventById(eventId);
 
         if (eventToReserve == null) {
             System.out.println("Event with ID " + eventId + " does not exist.");
@@ -73,13 +66,7 @@ public class ReservationService {
             reservedSeatsForEvent.addAll(reservation.items());
         }
 
-        List<Seat> seatsInTheVenue = new ArrayList<>();
-
-        for(Seat seat : ticketingRepository.findAllSeats()) {
-            if(seat.venueId().equals(eventToReserve.venueId())) {
-                seatsInTheVenue.add(seat);
-            }
-        }
+        List<Seat> seatsInTheVenue = ticketingRepository.findSeatsByVenueId(eventToReserve.venueId());
 
         Set<UUID> reservedSeatIds = new HashSet<>();
 
@@ -175,14 +162,7 @@ public class ReservationService {
             return;
         }
 
-        Reservation reservationToConfirm = null;
-
-        for (Reservation reservation : ticketingRepository.findAllReservations()) {
-            if (reservation.id().equals(reservationId)) {
-                reservationToConfirm = reservation;
-                break;
-            }
-        }
+        Reservation reservationToConfirm = ticketingRepository.findReservationById(reservationId);
 
         if (reservationToConfirm == null) {
             System.out.println("Reservation not found.");
@@ -205,4 +185,38 @@ public class ReservationService {
 
         System.out.println("Reservation confirmed successfully!");
     }
+
+    public void cancelReservation() {
+        System.out.print("\nEnter the reservation ID you want to cancel: ");
+        UUID reservationId;
+        try {
+            reservationId = UUID.fromString(scan.next());
+            scan.nextLine();
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid UUID format. Please enter a valid reservation ID.");
+            return;
+        }
+
+        Reservation reservationToCancel = ticketingRepository.findReservationById(reservationId);
+
+        if (reservationToCancel == null) {
+            System.out.println("Reservation not found.");
+            return;
+        }
+
+        if (reservationToCancel.status() != ReservationStatus.HOLD) {
+            System.out.println("Reservation is not in HOLD status and cannot be cancelled.");
+            return;
+        }
+
+        Instant now = Instant.now();
+
+        if (reservationToCancel.holdExpiresAt() != null && !reservationToCancel.holdExpiresAt().isAfter(now)) {
+            System.out.println("Reservation hold has already expired and cannot be cancelled.");
+            return;
+        }
+
+        ticketingRepository.updateReservation(new Reservation(reservationToCancel.id(), reservationToCancel.eventId(), reservationToCancel.customerEmail(), ReservationStatus.CANCELLED, reservationToCancel.createdAt(), now, null, reservationToCancel.items()));
+
+        System.out.println("Reservation cancelled successfully!");    }
 }

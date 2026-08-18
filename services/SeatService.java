@@ -1,6 +1,5 @@
 package services;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.UUID;
@@ -27,7 +26,7 @@ public class SeatService {
             System.out.print("\nEnter section name (e.g., VIP, Regular, Balcony): ");
             String section = scan.next().toUpperCase();
 
-            if ( section == null || section.isBlank()) {
+            if (section.isBlank()) {
                 System.out.println("Section name cannot be empty.");
                 continue;
             }
@@ -36,10 +35,12 @@ public class SeatService {
 
             if (!scan.hasNextInt()) {
                 System.out.println("\nPlease enter a valid integer.");
+                scan.nextLine();
                 continue;
             }
 
             int numberOfRows = scan.nextInt();
+            scan.nextLine();
 
             if (numberOfRows <= 0) {
                 System.out.println("Number of rows must be a positive integer.");
@@ -50,10 +51,12 @@ public class SeatService {
             
             if (!scan.hasNextInt()) {
                 System.out.println("\nPlease enter a valid integer.");
+                scan.nextLine();
                 continue;
             }
             
             int numberOfSeats = scan.nextInt();
+            scan.nextLine();
 
             if (numberOfSeats <= 0) {
                 System.out.println("Number of seats must be a positive integer.");
@@ -80,6 +83,7 @@ public class SeatService {
                 addingSections = false;
             } else {
                 System.out.println("\nInvalid input. Please enter 'Y' for Yes or 'N' for No.");
+                addingSections = false;
             }
         } while (addingSections);
 
@@ -97,25 +101,16 @@ public class SeatService {
             return;
         }
 
-        Venue venueToAddSeats = null;
-
-        for(Venue venue : ticketingRepository.findAllVenues()) {
-            if(venueId.equals(venue.id())) {
-                venueToAddSeats = venue;
-                break;
-            }
-        }
+        Venue venueToAddSeats = ticketingRepository.findVenueById(venueId);
 
         if(venueToAddSeats == null) {
             System.out.println("\nVenue with ID " + venueId + " does not exist.");
             return;
         }
 
-        for(Seat seat : ticketingRepository.findAllSeats()) {
-            if(venueId.equals(seat.venueId())) {
-                System.out.println("\nVenue with ID " + venueId + " already have seats.");
+        if (!ticketingRepository.findSeatsByVenueId(venueId).isEmpty()) {
+            System.out.println("\nVenue with ID " + venueId + " already have seats.");
                 return;
-            }
         }
 
         addSeats(venueToAddSeats.id(), venueToAddSeats.name());
@@ -132,27 +127,14 @@ public class SeatService {
             return;
         }
 
-        Venue venueToListSeats = null;
-
-        for (Venue venue : ticketingRepository.findAllVenues()) {
-            if (venueId.equals(venue.id())) {
-                venueToListSeats = venue;
-                break;
-            }
-        }
+        Venue venueToListSeats = ticketingRepository.findVenueById(venueId);
 
         if (venueToListSeats == null) {
             System.out.println("\nVenue with ID " + venueId + " does not exist.");
             return;
         }
 
-        List<Seat> seatsInTheVenue = new ArrayList<>();
-
-        for(Seat seat : ticketingRepository.findAllSeats()) {
-            if(venueId.equals(seat.venueId())) {
-                seatsInTheVenue.add(seat);
-            }
-        }
+        List<Seat> seatsInTheVenue = ticketingRepository.findSeatsByVenueId(venueId);
 
         if (seatsInTheVenue.isEmpty()) {
             System.out.println("\nVenue with ID " + venueId + " does not have any seats.");
