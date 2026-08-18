@@ -54,7 +54,11 @@ public class ReservationService {
         List<Reservation> reservationsForEvent = new ArrayList<>();
 
         for (Reservation reservation : ticketingRepository.findAllReservations()) {
-            if (reservation.eventId().equals(eventId)) {
+            if (!reservation.eventId().equals(eventId)) {
+                continue;
+            }
+
+            if ((reservation.status() == ReservationStatus.HOLD && reservation.holdExpiresAt().isAfter(Instant.now()) || reservation.status() == ReservationStatus.CONFIRMED)) {
                 reservationsForEvent.add(reservation);
             }
         }
