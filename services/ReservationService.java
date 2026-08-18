@@ -4,9 +4,11 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.UUID;
 
 import entities.Event;
@@ -51,21 +53,23 @@ public class ReservationService {
             return;
         }
 
-        List<Reservation> reservationsForEvent = new ArrayList<>();
+        Instant now = Instant.now();
+
+        List<Reservation> activeReservationsForEvent = new ArrayList<>();
 
         for (Reservation reservation : ticketingRepository.findAllReservations()) {
             if (!reservation.eventId().equals(eventId)) {
                 continue;
             }
 
-            if ((reservation.status() == ReservationStatus.HOLD && reservation.holdExpiresAt().isAfter(Instant.now()) || reservation.status() == ReservationStatus.CONFIRMED)) {
-                reservationsForEvent.add(reservation);
+            if ((reservation.status() == ReservationStatus.HOLD && reservation.holdExpiresAt() != null && reservation.holdExpiresAt().isAfter(now)) || reservation.status() == ReservationStatus.CONFIRMED) {
+                activeReservationsForEvent.add(reservation);
             }
         }
 
         List<ReservationSeat> reservedSeatsForEvent = new ArrayList<>();
 
-        for(Reservation reservation: reservationsForEvent) {
+        for(Reservation reservation: activeReservationsForEvent) {
             reservedSeatsForEvent.addAll(reservation.items());
         }
 
@@ -77,14 +81,17 @@ public class ReservationService {
             }
         }
 
-        List<Seat> availableSeats = new ArrayList<>(seatsInTheVenue);
+        Set<UUID> reservedSeatIds = new HashSet<>();
+
+        for (ReservationSeat reservationSeat : reservedSeatsForEvent) {
+            reservedSeatIds.add(reservationSeat.seatId());
+        }
+
+        List<Seat> availableSeats = new ArrayList<>();
 
         for (Seat seat : seatsInTheVenue) {
-            for (ReservationSeat reservationSeat : reservedSeatsForEvent) {
-                if (reservationSeat.seatId().equals(seat.id())) {
-                    availableSeats.remove(seat);
-                    break;
-                }
+            if (!reservedSeatIds.contains(seat.id())) {
+                availableSeats.add(seat);
             }
         }
 
@@ -129,13 +136,13 @@ public class ReservationService {
         System.out.print("\nEnter your email address: ");
         String customerEmail = scan.nextLine();
 
-        List<Seat> holdSeats = new ArrayList<>();
+        List<Seat> selectedSeats = new ArrayList<>();
 
         for (Seat seat : availableSeats) {
             if (seat.section().equals(selectedSection)) {
-                holdSeats.add(seat);
+                selectedSeats.add(seat);
                 
-                if (holdSeats.size() == numberOfSeatsToReserve) {
+                if (selectedSeats.size() == numberOfSeatsToReserve) {
                     break;
                 }
             }
@@ -145,14 +152,57 @@ public class ReservationService {
 
         List<ReservationSeat> reservationSeats = new ArrayList<>();
 
-        for (Seat seat : holdSeats) {
+        for (Seat seat : selectedSeats) {
             reservationSeats.add(new ReservationSeat(reservationId, seat.id(), null, null));
         }
 
-        Instant createdAt = Instant.now();
+        Instant holdExpiresAt = now.plus(5, ChronoUnit.MINUTES);
 
-        ticketingRepository.addReservation(new Reservation(reservationId, eventId, customerEmail, ReservationStatus.HOLD, createdAt, null, createdAt.plus(1, ChronoUnit.MINUTES), reservationSeats));
+        ticketingRepository.addReservation(new Reservation(reservationId, eventId, customerEmail, ReservationStatus.HOLD, now, null, holdExpiresAt, reservationSeats));
 
-        System.out.print("\nSuccessfully Reserved!!!");
+        System.out.print("\nReservation made successfully! Your reservation ID is: " + reservationId);
+        System.out.println("\nPlease confirm your reservation within 5 minutes.");
+    }
+
+    public void confirmReservation() {
+        System.out.print("\nEnter the reservation ID you want to confirm: ");
+        UUID reservationId;
+        try {
+            reservationId = UUID.fromString(scan.next());
+            scan.nextLine();
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid UUID format. Please enter a valid reservation ID.");
+            return;
+        }
+
+        Reservation reservationToConfirm = null;
+
+        for (Reservation reservation : ticketingRepository.findAllReservations()) {
+            if (reservation.id().equals(reservationId)) {
+                reservationToConfirm = reservation;
+                break;
+            }
+        }
+
+        if (reservationToConfirm == null) {
+            System.out.println("Reservation not found.");
+            return;
+        }
+
+        if (reservationToConfirm.status() != ReservationStatus.HOLD) {
+            System.out.println("Reservation is not in HOLD status and cannot be confirmed.");
+            return;
+        }
+
+        Instant now = Instant.now();
+
+        if (reservationToConfirm.holdExpiresAt() != null && !reservationToConfirm.holdExpiresAt().isAfter(now)) {
+            System.out.println("Reservation hold has expired and cannot be confirmed.");
+            return;
+        }
+
+        ticketingRepository.updateReservation(new Reservation(reservationToConfirm.id(), reservationToConfirm.eventId(), reservationToConfirm.customerEmail(), ReservationStatus.CONFIRMED, reservationToConfirm.createdAt(), now, null, reservationToConfirm.items()));
+
+        System.out.println("Reservation confirmed successfully!");
     }
 }

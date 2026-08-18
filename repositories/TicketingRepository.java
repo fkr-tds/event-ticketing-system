@@ -5,7 +5,6 @@ import java.util.List;
 
 import entities.Event;
 import entities.Reservation;
-import entities.ReservationSeat;
 import entities.Seat;
 import entities.Venue;
 
@@ -14,7 +13,6 @@ public class TicketingRepository {
     private final List<Event> events = new ArrayList<>();
     private final List<Seat> seats = new ArrayList<>();
     private final List<Reservation> reservations = new ArrayList<>();
-    private final List<ReservationSeat> reservationSeats = new ArrayList<>();
 
     public void addVenue(Venue venue) {
         venues.add(venue);
@@ -30,10 +28,6 @@ public class TicketingRepository {
 
     public void addReservation(Reservation reservation) {
         reservations.add(reservation);
-    }
-
-    public void addReservationSeat(ReservationSeat reservationSeat) {
-        reservationSeats.add(reservationSeat);
     }
 
     public List<Venue> findAllVenues() {
@@ -52,7 +46,12 @@ public class TicketingRepository {
         return List.copyOf(reservations);
     }
 
-    public List<ReservationSeat> findAllReservationSeats() {
-        return List.copyOf(reservationSeats);
+    public void updateReservation(Reservation updatedResrvation) {
+        for (int i = 0; i < reservations.size(); i++) {
+            if (reservations.get(i).id().equals(updatedResrvation.id())) {
+                reservations.set(i, updatedResrvation);
+                return;
+            }
+        }
     }
 }
