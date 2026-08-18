@@ -66,8 +66,8 @@ public class TicketingCommandLineInterface {
             }
         } else if (userType == 'C' || userType == 'c') {
             System.out.println("\nYou are logged in as a Customer. What would you like to do?");
-            System.out.println("\n1. List Venues\t2. List Events\t3. Make Reservation");
-            System.out.print("\nPlease select an option (1, 2 or 3): ");
+            System.out.println("\n1. List Venues\t2. List Events\t3. Make Reservation\t4. Confirm Reservation\t5. Cancel Reservation");
+            System.out.print("\nPlease select an option (1, 2, 3. 4 or 5): ");
 
             if (!scan.hasNextInt()) {
                 System.out.println("\nPlease enter a valid integer.");
@@ -89,6 +89,11 @@ public class TicketingCommandLineInterface {
                     eventService.listEvents();
                     reservationService.makeReservation();
                     break;
+                case 4:
+                    reservationService.confirmReservation();
+                    break;
+                case 5:
+                    reservationService.cancelReservation();
                 default:
                     System.out.println("\nInvalid choice. Please select a valid option.");
             }
