@@ -1,19 +1,29 @@
 package repositories;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import entities.Event;
 import entities.Reservation;
 import entities.Seat;
 import entities.Venue;
+import persistence.TicketingData;
 
 public class TicketingRepository {
+    
     private final List<Venue> venues = new ArrayList<>();
     private final List<Event> events = new ArrayList<>();
     private final List<Seat> seats = new ArrayList<>();
     private final List<Reservation> reservations = new ArrayList<>();
+
+    private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS).configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+    private final File file = new File("persistence/json/data.json");
 
     public void addVenue(Venue venue) {
         venues.add(venue);
@@ -90,12 +100,49 @@ public class TicketingRepository {
         return null;
     }
 
-    public void updateReservation(Reservation updatedResrvation) {
+    public void updateReservation(Reservation updatedReservation) {
         for (int i = 0; i < reservations.size(); i++) {
-            if (reservations.get(i).id().equals(updatedResrvation.id())) {
-                reservations.set(i, updatedResrvation);
+            if (reservations.get(i).id().equals(updatedReservation.id())) {
+                reservations.set(i, updatedReservation);
                 return;
             }
+        }
+    }
+
+    public void save() {
+        try {
+            TicketingData data = new TicketingData(
+                List.copyOf(venues),
+                List.copyOf(events),
+                List.copyOf(seats),
+                List.copyOf(reservations)
+            );
+
+            mapper.writeValue(file, data);   
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to save data.", e);
+        }
+    }
+
+    public void load() {
+        try {
+            if (!file.exists()) {
+                return;
+            }
+
+            TicketingData data = mapper.readValue(file, TicketingData.class);
+
+            venues.clear();
+            events.clear();
+            seats.clear();
+            reservations.clear();
+
+            venues.addAll(data.venues());
+            events.addAll(data.events());
+            seats.addAll(data.seats());
+            reservations.addAll(data.reservations());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load data.", e);
         }
     }
 }
