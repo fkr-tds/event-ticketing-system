@@ -23,7 +23,7 @@ public class TicketingRepository {
     private final List<Reservation> reservations = new ArrayList<>();
 
     private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS).configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-    private final File file = new File("persistence/json/data.json");
+    private final File file = new File("data/app.json");
 
     public void addVenue(Venue venue) {
         venues.add(venue);
